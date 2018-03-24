@@ -1,0 +1,552 @@
+<!--?xml version="1.0" encoding="utf-8" ?-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml-transitional.dtd">
+<html><head>
+  <title>holoumar@progtest.fit.cvut.cz - ProgTest</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link href="assignment_files/css.css" rel="stylesheet" type="text/css">
+  <script src="assignment_files/shared.js" language="JavaScript" type="text/javascript"></script>
+  
+ </head>
+ <body text="#000000" bgcolor="#828273">
+  
+
+
+
+
+
+ <br>
+ <br>
+   <center>
+   <div class="topLayout">
+    <div class="outBox">
+     <table class="header" width="100%" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+       <td class="header"><b>Paměťový manažer</b></td>
+      </tr>
+     </tbody></table>
+    </div>
+   </div>
+  </center>
+ <form name="form1" method="post" action="?X=TaskU&amp;Cou=136&amp;Tgr=835&amp;Tsk=1201" enctype="multipart/form-data">
+  <center>
+    <div class="topLayout">
+     <div class="outBox">
+      <table id="maintable" width="100%" cellspacing="0" cellpadding="2" border="0">
+       <colgroup><col width="200">
+       <col>
+       <col width="130">
+
+       </colgroup><tbody><tr>
+        <td class="ltCell" align="left"><b>Termín odevzdání:</b></td>
+        <td class="tCell" align="left"><b>03.05.2015 23:59:59</b></td>
+        <td class="rtCell" id="countdown" align="right">&nbsp;</td>
+       </tr>
+
+       <tr>
+        <td class="lCell" align="left"><b>Hodnocení:</b></td>
+        <td class="rCell" colspan="2" align="left"><b>33.0000</b></td>
+       </tr>
+       <tr>
+        <td class="lCell" align="left"><b>Max. hodnocení:</b></td>
+        <td class="rCell" colspan="2" align="left"><b>30.0000</b> (bez bonusů)</td>
+       </tr>
+       <tr>
+        <td class="lCell" align="left"><b>Odevzdaná řešení:</b></td>
+        <td class="rCell" colspan="2" align="left">1 /  60</td>
+       </tr>
+
+       <tr>
+        <td class="lbCell" align="left"><b>Nápovědy:</b></td>
+        <td class="rbCell" colspan="2" align="left">0 / 0</td>
+       </tr>
+
+       <tr>
+        <td class="lrtbCell" colspan="3" align="left"><p>Zadaný úkol je zaměřen na podobnější pochopení přidělování paměti v OS. 
+Jedná se z velmi zjednodušenou variantu, která spočívá v implementaci
+jednoduchého správce dynamicky alokované paměti uživatelského procesu.</p>
+
+<p>V jednoduchém modelovém prostředí neexistuje správce haldy (v testovacím
+prostředí na Progtestu je odpojen). Tedy neexistují funkce <tt>malloc</tt>, 
+<tt>free</tt>, ..., ani operátory <tt>new</tt> a <tt>delete</tt>. Vaším
+úkolem je naimplementovat jejich zjednodušené ekvivalenty.</p>
+
+<p>Vaše rozhraní bude pracovat nad blokem svěřené paměti zadané velikosti 
+(při inicializaci Vám bude předán ukazatel na existující blok paměti a 
+informace o velikosti tohoto bloku paměti). Předaný blok paměti bude 
+souvislý a relativně velký (jednotky až stovky MiB). 
+Vámi implementovaný paměťový subsystém bude mít za úkol tento
+svěřený blok paměti obhospodařovat. Tedy umožnit jeho využití v menších
+částech podle přicházejících požadavků, udržovat si informace o alokovaných 
+a nepoužitých částech svěřeného bloku paměti, umožnit alokaci bloku, 
+uvolnění alokovaného bloku a slévání uvolněných bloků do souvislých celků.</p>
+
+<p>Odevzdávat budete zdrojový kód, který bude obsahovat funkce se zadaným
+rozhraním. Testovací prostředí k sobě připojí Vámi odevzdaný zdrojový kód 
+a začne používat funkce z definovaného rozhraní. Na základě jejich odezvy 
+pak rozhodne o funkčnosti nebo nefunkčnosti odevzdávané implementace. 
+Je tedy potřeba přesně dodržet specifikaci rozhraní (jména funkcí, 
+typy parametrů, ...). Vámi odevzdávaný kód nebude plnohodnotný program. 
+Nebude mít např. funkci <tt>main</tt>, bude se jednat spíše o modul 
+(knihovnu funkcí). </p>
+
+<p>Požadované funkce a jejich význam:</p>
+
+<dl>
+ <dt><tt>void HeapInit ( void * startAddr, int size );</tt></dt><dd>
+
+<p>Funkce <tt>HeapInit</tt>, bude zavolána na počátku při inicializaci subsystému, 
+ před voláním ostatních implementovaných funkcí. Funkce má parametrem ukazatel 
+ <tt>startAddr</tt>, který udává paměťovou adresu bloku, který má Váš paměťový 
+ subsystém obhospodařovat. Druhým parametrem je <tt>size</tt> - velikosti svěřeného 
+ bloku paměti v bajtech.</p>
+
+<p>V tomto paměťovém bloku (začíná na adrese <tt>startAddr</tt> a má velikost
+  <tt>size</tt> bajtů) bude realizována halda. Tedy budou zde uložené veškeré
+ alokované bloky i Vaše servisní informace o tom, jaké části Vaší haldy jsou jak
+ využívané / volné.</p></dd>
+
+
+ <dt><tt>void HeapDone ( int * pendingBlk );</tt></dt><dt></dt><dd>
+
+<p>Funkce <tt>HeapDone</tt>, bude zavolána na konci používání haldy.
+ Funkce zjistí, kolik bloků paměti na haldě ještě zůstalo alokovaných, 
+ tuto informaci předá volajícímu prostřednictvím výstupního parametru
+ <tt>pendingBlk</tt>.</p></dd>
+
+
+ <dt><tt>void * HeapAlloc ( int size );</tt></dt><dd>
+
+<p>Funkce <tt>HeapAlloc</tt> bude sloužit jako vstupní bod pro alokaci
+ bloku paměti ve spravované haldě. Funkce má parametrem velikost požadovaného
+ bloku a vrací ukazatel na přidělený prostor paměti. V případě selhání
+ funkce vrací hodnotu <tt>NULL</tt>. K selhání může dojít pokud 
+ je prostor ve svěřené paměti již vyčerpán nebo pokud svěřený blok paměti po
+ předchozích alokacích již neobsahuje dostatečně velký souvislý prostor pro 
+ požadovanou alokaci.</p></dd>
+
+
+ <dt><tt>bool HeapFree ( void * blk );</tt></dt><dd>
+
+<p>Funkce <tt>HeapFree</tt> slouží k uvolnění bloku dříve alokovaného
+ pomocí <tt>HeapAlloc</tt>. Funkce vrací hodnotu true, pokud blok úspěšně
+ uvolnila nebo hodnotu false, pokud se blok nepodařilo uvolnit (zadaná 
+ neplatná adresa, blok již byl uvolněn, ...).</p></dd>
+
+</dl>
+
+<p>Odevzdávejte soubor, který obsahuje implementaci požadovaných funkcí,
+potřebných deklarací globálních proměnných, datových typů a podpůrných
+funkcí. Za základ využijte přiložený ukázkový kód. Pokud ponecháte 
+direktivy pro podmíněný překlad, lze zdrojový soubor rovnou odevzdávat 
+Progtestu.</p>
+
+<p>Při implementaci máte velmi omezené prostředky (viz seznam hlavičkových souborů). 
+Není k dispozici STL, nejsou k dispozici standardní funkce pro dynamickou alokaci 
+(malloc, ...) ani jejich C++ ekvivalenty (<tt>new</tt>). Odevzdávaný kód bude 
+spouštěn v omezeném prostředí. Budete omezeni dostupnou pamětí (kromě svěřeného 
+bloku paměti je k dispozici pouze pár kilobyte na uložení několika málo globálních 
+proměnných). Tato extra dostupná paměť nepostačuje pro uložení všech servisních 
+informací o alokacích (tyto informace budete muset ukládat do spravované paměti 
+a řídit si jejich rozmisťování).</p>
+
+
+<p>Hodnocení je rozděleno na povinnou a nepovinnou část. V povinné části 
+se testuje správnost alokátoru. Je potřeba, aby správně přiděloval paměť, aby se 
+alokované bloky nepřekrývaly a aby se uvolněná paměť správně spojovala.</p>
+
+<p>Nepovinné testy kontrolují, jak se Vaše implementace vypořádá s fragmentací 
+a jak rychle dokáže pracovat pro velké množství alokovaných bloků. Pokud tyto testy 
+neprojdete, bude Vaše hodnocení kráceno.</p>
+
+<b>Příklad použití rozhraní správce paměti:</b><br>
+
+<hr>
+<pre>#ifndef __PROGTEST__
+#include &lt;cstdio&gt;
+#include &lt;cstdlib&gt;
+#include &lt;cstring&gt;
+#include &lt;cstdint&gt;
+#include &lt;cassert&gt;
+#include &lt;cmath&gt;
+using namespace std;
+#endif /* __PROGTEST__ */
+
+void   HeapInit    ( void * memPool, int memSize )
+ { /* todo */ }
+void * HeapAlloc   ( int    size )
+ { /* todo */ }
+bool   HeapFree    ( void * blk )
+ { /* todo */ }
+void   HeapDone    ( int  * pendingBlk )
+ { /* todo */ }
+
+#ifndef __PROGTEST__
+int main ( void )
+ {
+   uint8_t       * p0, *p1, *p2, *p3, *p4;
+   int             pendingBlk;
+   static uint8_t  memPool[3 * 1048576];
+
+   HeapInit ( memPool, 2097152 );
+   assert ( ( p0 = (uint8_t*) HeapAlloc ( 512000 ) ) != NULL );
+   memset ( p0, 0, 512000 );
+   assert ( ( p1 = (uint8_t*) HeapAlloc ( 511000 ) ) != NULL );
+   memset ( p1, 0, 511000 );
+   assert ( ( p2 = (uint8_t*) HeapAlloc ( 26000 ) ) != NULL );
+   memset ( p2, 0, 26000 );
+   HeapDone ( &amp;pendingBlk );
+   assert ( pendingBlk == 3 );
+
+
+   HeapInit ( memPool, 2097152 );
+   assert ( ( p0 = (uint8_t*) HeapAlloc ( 1000000 ) ) != NULL );
+   memset ( p0, 0, 1000000 );
+   assert ( ( p1 = (uint8_t*) HeapAlloc ( 250000 ) ) != NULL );
+   memset ( p1, 0, 250000 );
+   assert ( ( p2 = (uint8_t*) HeapAlloc ( 250000 ) ) != NULL );
+   memset ( p2, 0, 250000 );
+   assert ( ( p3 = (uint8_t*) HeapAlloc ( 250000 ) ) != NULL );
+   memset ( p3, 0, 250000 );
+   assert ( ( p4 = (uint8_t*) HeapAlloc ( 50000 ) ) != NULL );
+   memset ( p4, 0, 50000 );
+   assert ( HeapFree ( p2 ) );
+   assert ( HeapFree ( p4 ) );
+   assert ( HeapFree ( p3 ) );
+   assert ( HeapFree ( p1 ) );
+   assert ( ( p1 = (uint8_t*) HeapAlloc ( 500000 ) ) != NULL );
+   memset ( p1, 0, 500000 );
+   assert ( HeapFree ( p0 ) );
+   assert ( HeapFree ( p1 ) );
+   HeapDone ( &amp;pendingBlk );
+   assert ( pendingBlk == 0 );
+
+
+   HeapInit ( memPool, 2359296 );
+   assert ( ( p0 = (uint8_t*) HeapAlloc ( 1000000 ) ) != NULL );
+   memset ( p0, 0, 1000000 );
+   assert ( ( p1 = (uint8_t*) HeapAlloc ( 500000 ) ) != NULL );
+   memset ( p1, 0, 500000 );
+   assert ( ( p2 = (uint8_t*) HeapAlloc ( 500000 ) ) != NULL );
+   memset ( p2, 0, 500000 );
+   assert ( ( p3 = (uint8_t*) HeapAlloc ( 500000 ) ) == NULL );
+   assert ( HeapFree ( p2 ) );
+   assert ( ( p2 = (uint8_t*) HeapAlloc ( 300000 ) ) != NULL );
+   memset ( p2, 0, 300000 );
+   assert ( HeapFree ( p0 ) );
+   assert ( HeapFree ( p1 ) );
+   HeapDone ( &amp;pendingBlk );
+   assert ( pendingBlk == 1 );
+
+
+   HeapInit ( memPool, 2359296 );
+   assert ( ( p0 = (uint8_t*) HeapAlloc ( 1000000 ) ) != NULL );
+   memset ( p0, 0, 1000000 );
+   assert ( ! HeapFree ( p0 + 1000 ) );
+   HeapDone ( &amp;pendingBlk );
+   assert ( pendingBlk == 1 );
+
+
+   return 0;
+ }
+#endif /* __PROGTEST__ */
+</pre>
+</td>
+       </tr>
+
+
+
+
+
+
+
+
+
+
+
+
+      </tbody></table>
+     </div>
+    </div>
+
+
+ <br>
+ <div class="topLayout">
+  <div class="outBox">
+   <table id="reftable" width="100%" cellspacing="0" cellpadding="2" border="0">
+   <tbody><tr>
+    <td class="ltbSepCell" align="left"><input name="SHOW_REF" onchange="showRefSolution()" type="checkbox">&nbsp;<b>Referenční řešení</b></td>
+    <td class="rtbSepCell" align="right">&nbsp;</td>
+   </tr>
+   <tr style="display: none;">
+    <td class="lrtbCell" colspan="2" align="left"><ul><li><b>Hodnotitel: automat</b><ul><li>Program zkompilován</li><li>Test 'Zakladni test podle ukazky': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.009 s (limit: 5.000 s)</li><li>Využití paměti: 61876 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Jeden velky blok': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.077 s (limit: 4.991 s)</li><li>Využití paměti: 61876 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Mnoho malych bloku': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.006 s (limit: 4.914 s)</li><li>Využití paměti: 61876 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Nahodne operace': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.324 s (limit: 4.908 s)</li><li>Využití paměti: 61876 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test fragmentace': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.019 s (limit: 5.000 s)</li><li>Využití paměti: 61876 KiB (limit: 62337 KiB)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test rychlosti': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.279 s (limit: 4.981 s)</li><li>Využití paměti: 61876 KiB (limit: 62337 KiB)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Celkové hodnocení: 100.00 % (= 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00)</li></ul></li><li>Celkové procentní hodnocení: 100.00 %</li><li>Bonus za včasné odevzdání: 3.00</li><li>Celkem bodů: 1.00 * ( 30.00 + 3.00 ) = 33.00</li></ul></td>
+   </tr>
+    <tr style="display: none;">
+  <td class="ltbCell" align="left"><b>SW metriky:</b></td>
+  <td class="rtbCell" colspan="2" align="left">
+   <table cellpadding="2" border="0">
+    <tbody><tr>
+     <td>&nbsp;</td>
+     <td class="ac">Celkem</td>
+     <td class="ac">Průměr</td>
+     <td class="ac">Maximum</td>
+     <td>Jméno funkce</td>
+    </tr>
+    <tr>
+     <td>Funkce:</td>
+     <td class="ar"><b>17</b></td>
+     <td class="ar">--</td>
+     <td class="ar">--</td>
+     <td>--</td>
+    </tr>
+    <tr>
+     <td>Řádek kódu:</td>
+     <td class="ar"><b>228</b></td>
+     <td class="ar"><span class="textOk">13.41 ± 14.41</span></td>
+     <td class="ar"><span class="textWarn">51</span></td>
+     <td><tt>Init(void *,uint32_t)</tt></td>
+    </tr>
+    <tr>
+     <td>Cyklomatická složitost:</td>
+     <td class="ar"><b>51</b></td>
+     <td class="ar"><span class="textOk">3.00 ± 3.82</span></td>
+     <td class="ar"><span class="textOk">10</span></td>
+     <td><tt>Malloc(uint32_t)</tt></td>
+    </tr>
+   </tbody></table>
+  </td>
+ </tr>
+   </tbody></table>
+  </div>
+ </div>
+
+
+
+
+ <br>
+ <div class="topLayout">
+  <div class="outBox">
+   <table id="maintable" width="100%" cellspacing="0" cellpadding="2" border="0">
+    <colgroup><col width="200">
+    <col>
+    <col width="130">
+
+   </colgroup><tbody><tr>
+    <td class="ltbOkSepCell" align="left"><b>1</b></td>
+    
+    
+   </tr>
+   <tr>
+    <td class="ltCell" align="left"><b>Stav odevzdání:</b></td>
+    <td class="tCell" align="left">Ohodnoceno</td>
+
+
+
+    <td class="rtbCell" rowspan="2">&nbsp;</td>
+
+
+   </tr>
+
+   <tr>
+    <td class="lbCell" align="left"><b>Hodnocení:</b></td>
+    <td class="bCell" align="left">33.0000</td>
+   </tr>   <tr>
+    <td class="lrtbCell" colspan="3" align="left"><ul><li><b>Hodnotitel: automat</b><ul><li>Program zkompilován</li><li>Test 'Zakladni test podle ukazky': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.007 s (limit: 10.000 s)</li><li>Využití paměti: 61868 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Jeden velky blok': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.017 s (limit: 9.993 s)</li><li>Využití paměti: 61868 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Mnoho malych bloku': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.001 s (limit: 9.976 s)</li><li>Využití paměti: 61868 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Nahodne operace': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.019 s (limit: 9.975 s)</li><li>Využití paměti: 61868 KiB (limit: 62337 KiB)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test fragmentace': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.010 s (limit: 5.000 s)</li><li>Využití paměti: 61868 KiB (limit: 62337 KiB)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test rychlosti': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.045 s (limit: 4.990 s)</li><li>Využití paměti: 61868 KiB (limit: 62337 KiB)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Celkové hodnocení: 100.00 % (= 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00)</li></ul></li><li>Celkové procentní hodnocení: 100.00 %</li><li>Bonus za včasné odevzdání: 3.00</li><li>Celkem bodů: 1.00 * ( 30.00 + 3.00 ) = 33.00</li></ul></td>
+   </tr> <tr>
+  <td class="ltbCell" align="left"><b>SW metriky:</b></td>
+  <td class="rtbCell" colspan="2" align="left">
+   <table cellpadding="2" border="0">
+    <tbody><tr>
+     <td>&nbsp;</td>
+     <td class="ac">Celkem</td>
+     <td class="ac">Průměr</td>
+     <td class="ac">Maximum</td>
+     <td>Jméno funkce</td>
+    </tr>
+    <tr>
+     <td>Funkce:</td>
+     <td class="ar"><b>10</b></td>
+     <td class="ar">--</td>
+     <td class="ar">--</td>
+     <td>--</td>
+    </tr>
+    <tr>
+     <td>Řádek kódu:</td>
+     <td class="ar"><b>224</b></td>
+     <td class="ar"><span class="textOk">22.40 ± 22.73</span></td>
+     <td class="ar"><span class="textWarn">86</span></td>
+     <td><tt>main(void)</tt></td>
+    </tr>
+    <tr>
+     <td>Cyklomatická složitost:</td>
+     <td class="ar"><b>38</b></td>
+     <td class="ar"><span class="textOk">3.80 ± 3.97</span></td>
+     <td class="ar"><span class="textOk">13</span></td>
+     <td><tt>HeapFree(void *)</tt></td>
+    </tr>
+   </tbody></table>
+  </td>
+ </tr>   </tbody></table>
+  </div>
+ </div> <br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+  </center>
+ </form>
+
+
+
+
+
+
+
+
+<script language="javascript" type="text/javascript">
+<!--
+
+var deadLine = new Date ( 1430690399 * 1000 );
+
+function CBpressed ( num )
+ {
+   var pre, cb;
+
+   cb = MM_findObj ( "cb_" + num );
+   pre = MM_findObj ( "pre_" + num );
+   if ( cb != null && pre != null )
+    {
+      pre . style . display = cb . checked ? "block" : "none";
+    }
+ }
+
+function unlockAdvice ( url )
+ {
+   if ( confirm ( 'Máte k dispozici pouze omezený počet nápověd. Navíc, použití nápovědy může snížit bodové hodnocení. Opravdu chcete zpřístupnit tuto nápovědu?' ) )
+    this . location = url;
+ }
+
+function setCountdown ( )
+ {
+   var d = new Date ();
+   var x = ( deadLine . getTime () - d . getTime () );
+   var tgt = document . getElementById ( "countdown" );
+
+   if ( x > 0 )
+    {
+      var s = Math . floor ( x / 1000 );
+      var ms = (x % 1000) + "";
+
+      while ( ms . length  < 3 ) ms = "0" + ms;
+
+      tgt . innerHTML = s + "." + ms + " sec";
+
+      window . setTimeout ( setCountdown, 117 );
+    }
+   else
+    {
+      tgt . innerHTML = '&nbsp;';
+    }
+ }
+
+function showRefSolution ( )
+ {
+   var t = document . getElementById ( "reftable" );
+   var x = document . getElementsByName ( "SHOW_REF" )[0];
+
+   if ( ! x ) return;
+   var r1 = t . rows[1], r2 = t . rows[2];
+
+   if ( x . checked )
+    {
+      r1 . style . display = "";
+      if ( r2 ) r2 . style . display = "";
+    }
+   else
+    {
+      r1 . style . display = "none";
+      if ( r2 ) r2 . style . display = "none";
+    }
+ }
+
+
+setCountdown ();
+showRefSolution ();
+
+// -->
+</script>
+
+
+
+
+
+ 
+
+
+</body></html>
+<!-- Template run time: 0.21693205833435 sec -->

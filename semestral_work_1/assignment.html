@@ -1,0 +1,702 @@
+<!--?xml version="1.0" encoding="utf-8" ?-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml-transitional.dtd">
+<html><head>
+  <title>holoumar@progtest.fit.cvut.cz - ProgTest</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link href="assignment_files/css.css" rel="stylesheet" type="text/css">
+  <script src="assignment_files/shared.js" language="JavaScript" type="text/javascript"></script>
+  
+ </head>
+ <body text="#000000" bgcolor="#828273">
+  
+<br>
+
+
+
+
+ 
+ <br>
+   <center>
+   <div class="topLayout">
+    <div class="outBox">
+     <table class="header" width="100%" cellspacing="0" cellpadding="0">
+      <tbody><tr>
+       <td class="header"><b>Spekulace s pozemky</b></td>
+      </tr>
+     </tbody></table>
+    </div>
+   </div>
+  </center>
+ <form name="form1" method="post" action="?X=TaskU&amp;Cou=136&amp;Tgr=834&amp;Tsk=1184" enctype="multipart/form-data">
+  <center>
+    <div class="topLayout">
+     <div class="outBox">
+      <table id="maintable" width="100%" cellspacing="0" cellpadding="2" border="0">
+       <colgroup><col width="200">
+       <col>
+       <col width="130">
+
+       </colgroup><tbody><tr>
+        <td class="ltCell" align="left"><b>Termín odevzdání:</b></td>
+        <td class="tCell" align="left"><b>05.04.2015 23:59:59</b></td>
+        <td class="rtCell" id="countdown" align="right">&nbsp;</td>
+       </tr>
+
+       <tr>
+        <td class="lCell" align="left"><b>Hodnocení:</b></td>
+        <td class="rCell" colspan="2" align="left"><b>39.6000</b></td>
+       </tr>
+       <tr>
+        <td class="lCell" align="left"><b>Max. hodnocení:</b></td>
+        <td class="rCell" colspan="2" align="left"><b>30.0000</b> (bez bonusů)</td>
+       </tr>
+       <tr>
+        <td class="lCell" align="left"><b>Odevzdaná řešení:</b></td>
+        <td class="rCell" colspan="2" align="left">1 /  60</td>
+       </tr>
+
+       <tr>
+        <td class="lbCell" align="left"><b>Nápovědy:</b></td>
+        <td class="rbCell" colspan="2" align="left">0 / 0</td>
+       </tr>
+
+       <tr>
+        <td class="lrtbCell" colspan="3" align="left"><p>Úkolem je realizovat sadu funkcí, které budou umožňovat rychle 
+naceňovat pozemky podle různých kritérií.</p>
+
+<p>Dnešní burzovní operace jsou závislé na rychlém zpracování a rozhodování.
+Úkolem bude vytvořit takovou podporu pro spekulace s pozemky. Předpokládáme, 
+že máme mapu pozemků k prodeji/koupi. Tato mapa má čtvercový tvar a je rozdělena 
+na N x N čtvercových polí (parcel). Parcela je dále nedělitelná a má pro další úvahu 
+jednotkovou velikost. Chceme vyhledávat obdélníkový výřez mapy (tedy X x Y parcel, 
+X ≤ N, Y ≤ N) podle následujících kritérií:</p>
+
+<ol>
+ <li>nalezení co největší části mapy, kde celková cena parcel je nižší nebo rovná zadané mezi. 
+  Na vstupu je mapa NxN parcel, pro každou parcelu známe její cenu. Cena může být kladná 
+  i záporná (na parcele je závazek). Úkolem je najít obdélníkový výřez s co největší 
+  plochou, kde celková částka nepřekračuje zadanou mez. Takových výřezů může být i více, úkolem 
+  je najít alespoň jeden či nahlásit, že za danou cenu nejde nic koupit.</li>
+
+ <li>Nalezení co největší části mapy, kde míra kriminality na žádné parcele nepřekračuje 
+  zadanou mez. Na vstupu je mapa NxN parcel, pro každou parcelu známe hodnotu zločinnosti
+  (průměrný počet zločinů spáchaných v daném místě během nějakého sledovaného období, nezáporné 
+  desetinné číslo). Úkolem je najít obdélníkový výřez s co největší plochou, kde na žádné parcele 
+  výřezu nepřekročí míra kriminality zadanou mez. Takových výřezů může být opět více, úkolem je 
+  najít alespoň jeden či nahlásit, že za daných podmínek nelze nic koupit.</li>
+</ol>
+
+<p>Vaším úkolem je realizovat software, který dokáže tyto problémy řešit. Protože se jedná 
+o výpočetně náročné problémy, je potřeba výpočet rozdělit do vláken a tím výpočet urychlit. 
+Požadované rozhraní má následující podobu:</p>
+
+<pre>struct TRect
+ { 
+   int             m_X;
+   int             m_Y;
+   int             m_W;
+   int             m_H;
+ };
+
+struct TCostProblem
+ { 
+   int          ** m_Values;
+   int             m_Size;
+   int             m_MaxCost;
+   void         (* m_Done) ( const TCostProblem *, const TRect * );
+ };
+
+struct TCrimeProblem
+ {
+   double       ** m_Values;
+   int             m_Size;
+   double          m_MaxCrime;
+   void         (* m_Done) ( const TCrimeProblem *, const TRect * );
+ };
+
+void MapAnalyzer ( int               threads,
+                   const TCostProblem * (* costFunc) ( void ),
+                   const TCrimeProblem * (* crimeFunc) ( void ) );
+
+bool FindByCost  ( int            ** values,
+                   int               size,  
+                   int               maxCost,
+                   TRect           * res );  
+
+bool FindByCrime ( double         ** values,
+                   int               size,  
+                   double            maxCrime,
+                   TRect           * res );   
+</pre>
+
+<dl>
+ <dt><tt>TRect</tt></dt><dd>je pomocná struktura popisující obdélníkový výřez v mapě. Má složky 
+       <tt>m_X</tt>, <tt>m_Y</tt>, <tt>m_W</tt> a <tt>m_H</tt>, tyto udávají pozici levého horního 
+       rohu, šířky a výšky.</dd>
+ <dt><tt>TCostProblem</tt></dt><dd>struktura popisuje problém hledání největšího výřezu s celkovou 
+       cenou menší než zadaná mez. Složky struktury jsou:
+   <ul>
+    <li><tt>m_Values</tt> - 2D pole hodnot s cenou jednotlivých parcel. Pole je orientováno po řádcích, tedy
+      pozice <tt>x,y</tt> bude na indexech <tt>m_Values[y][x]</tt> (nejprve řádek - y),</li>
+    <li><tt>m_Size</tt> - velikost mapy (mapa je čtvercová),</li>
+    <li><tt>m_MaxCost</tt> - maximální celková cena,</li>
+    <li><tt>m_Done</tt> - ukazatel na funkci, kterou je potřeba zavolat po vyřešení problému 
+     s předanými výsledky.</li>
+   </ul>
+
+   Význam složek struktury je jasný, jediný problém může být se složkou <tt>m_Done</tt>. Předpokládáme 
+   asynchronní model výpočtu. Volající (zadavatel) vyplní složky struktury a předá problém Vaší implementaci 
+   k vyřešení. Funkce nezačne problém řešit hned, nejspíše jej předá nějakému vláknu ke zpracování, možná 
+   jej i rozdělí, ... V okamžiku, kdy bude výpočet hotový, je potřeba řešení předat zadavateli. To Vaše 
+   implementace provede tím, že zavolá právě tuto funkci. Při volání je potřeba předat 2 parametry: 
+   prvním je zadání vyřešeného problému (předáte ukazatel na TCostProblem v nezměněné podobě) a druhým je 
+   ukazatel na vyplněnou strukturu, kde se nachází hledaný výřez mapy. Pokud se žádný výřez nepodaří najít 
+   (každá jednotlivá parcela je dražší než zadaná mez), bude druhý parametr volání NULL. </dd>
+
+ <dt><tt>TCrimeProblem</tt></dt><dd>je struktura popisující hledání výřezu mapy, kde kriminalita na 
+    žádné parcele nepřekračuje zadanou mez. Složky jsou:
+   <ul>
+    <li><tt>m_Values</tt> - 2D pole hodnot s mírou kriminality pro jednotlivé parcely, pole je opět uloženo 
+        po řádcích,</li>
+    <li><tt>m_Size</tt> - velikost mapy (mapa je čtvercová),</li>
+    <li><tt>m_MaxCrime</tt> - maximální přípustná míra kriminality na jednotlivé parcele,</li>
+    <li><tt>m_Done</tt> - ukazatel na funkci, kterou je potřeba zavolat po vyřešení problému 
+     s předanými výsledky, použití je shodné jako v předchozí struktuře.</li>
+   </ul></dd>
+
+  <dt><tt>MapAnalyzer(threads, costFunc, crimeFunc)</tt></dt><dd>Vámi implementovaná funkce, která 
+   umožní časově optimální řešení problémů vyhledávání v mapách. Funkce bude zodpovědná za vytvoření
+   čtecích a pracovních vláken, jejich synchronizaci a ukončení. Parametry funkce jsou:
+   <ul>
+    <li><tt>threads</tt> - počet pracovních vláken, které má funkce vytvořit. Funkce vytvoří tato vlákna, 
+       aby fakticky počítala zadané problémy. Dále funkce vytvoří 1-2 vlákna pro načítání vstupů (viz níže).</li>
+
+    <li><tt>costFunc</tt> - ukazatel na funkci, kterou bude volat jedno z načítacích vláken. Po zavolání 
+       takto zprostředkované funkce dostane volající ukazatel odkazující na další problém k vyřešení. 
+       Tento ukazatel si nejspíše předáte pracovním vláknům, aby jej dále zpracovala a vyřešila. Pozor: 
+       takto předaný ukazatel je určený pouze ke čtení, je potřeba jej odevzdat funkci <tt>m_Done</tt> 
+       v nezměněné podobě (původní obsah i původní adresa, ne kopie dat). Pokud volání <tt>costFunc</tt> 
+       vrátí <tt>NULL</tt>, znamená to, že další problémy typu "největší oblast s danou maximální cenou" 
+       již nebudou zadávané (ale stále ještě mohou být zadávané problémy s kriminalitou).</li>
+
+    <li><tt>crimeFunc</tt> - ukazatel na funkci, která po zavolání vrací hodnotu ukazatele odkazujícího 
+       na další problém typu "největší oblast s max. kriminalitou nepřevyšující danou mez". Pro funkci platí 
+       stejné jako pro <tt>costFunc</tt>.</li>
+   </ul>
+ 
+   <p>Bylo zmíněno, že funkce <tt>MapAnalyzer</tt> vytvoří <tt>threads+2</tt> vláken - dvě vlákna budou načítat 
+   vstup voláním předaných ukazatelů na funkce. Fakticky ale stačí vytvořit pouze <tt>threads + 1</tt> nových vláken 
+   a využít i vlákna. ze kterého byla volaná funkce <tt>MapAnalyzer</tt>.</p>
+
+   <p>Funkce <tt>MapAnalyzer</tt> skončí v okamžiku, kdy byly vyřešené všechny zadané vstupní problémy a další 
+    nové problémy nejsou k dispozici (jak <tt>costFunc</tt>, tak <tt>crimeFunc</tt> vrací <tt>NULL</tt>). Po 
+    zaniknutí Vámi vytvořených vláken funkce <tt>MapAnalyzer</tt> vrátí řízení volanému. Neukončujte celý program 
+    (nevolejte <tt>exit</tt> a podobné funkce), pokud ukončíte celý program, budete hodnoceni 0 body.</p></dd>
+    
+  <dt><tt>FindByCost(map, size, maxCost, res)</tt></dt><dd>Vámi implementovaná funkce, která sekvenčně nalezne 
+    největší výřez mapy, kde celková cena parcel nepřekračuje zadanou mez. Parametry jsou:
+    <ul>
+     <li><tt>values</tt> - cena jednotlivých parcel na mapě, analogie složky <tt>TCostProblem . m_Values</tt>,</li>
+     <li><tt>size</tt> - velikost mapy, odpovídá <tt>TCostProblem . m_Size</tt>,</li>
+     <li><tt>maxCost</tt> - maximální celková cena, <tt>TCostProblem . m_MaxCost</tt>,</li> 
+     <li><tt>res</tt> - výstupní parametr, kam funkce umístí nalezenou oblast na mapě splňující zadání.</li>
+    </ul>
+    <p>Návratovou hodnotou funkce je <tt>true</tt> pro úspěch (oblast na mapě nalezena, výstupní parametr 
+     <tt>res</tt> obsahuje platná data), nebo <tt>false</tt> pokud se nepodaří takový výřez mapy najít 
+     (zadaná max. cena je příliš nízká).</p>
+
+    <p>Tato funkce je testovaná v prvním testu (sekvenční). Slouží k tomu, abyste mohli snáze nalézt případné 
+     chyby ve Vašem algoritmu hledání výřezu mapy podle ceny.</p></dd>
+
+  <dt><tt>FindByCrime(map, size, maxCrime, res)</tt></dt><dd>je analogie funkce <tt>FindByCost</tt> pro řešení 
+    problému nalezení výřezu mapy, kde max. kriminalita nepřekračuje zadanou mez. Funkce opět slouží ke snazšímu 
+    otestování implementace vyhledávání.</dd>
+</dl>
+
+<hr>
+
+<p>Odevzdávejte zdrojový kód s implementací požadovaných funkcí.
+Do Vaší implementace nevkládejte funkci <tt>main</tt> ani direktivy pro 
+vkládání hlavičkových souborů. Funkci <tt>main</tt> a hlavičkové soubory 
+lze ponechat pouze v případě, že jsou zabalené v bloku podmíněného 
+překladu.</p>
+
+<p>Využijte přiložené ukázkové soubory. Zdrojové soubory a Makefile lze použít 
+pro lokální testování Vaší implementace. Celá implementace patří do souboru 
+<tt>solution.cpp</tt>, dodaný soubor je pouze mustr. Pokud zachováte bloky 
+podmíněného překladu, můžete soubor <tt>solution.cpp</tt> odevzdávat jako 
+řešení úlohy.</p>
+
+<p>Při řešení lze využít C++11 API pro práci s vlákny (viz vložené hlavičkové 
+soubory). Dostupný kompilátor však nezvládá C++11 ideálně. Pokud při použití C++11 
+konstrukcí či API narazíte na chybu/nedokonalost kompilátoru, budete muset svůj 
+program přepsat tak, abyste tuto chybu či nedokonalost obešli. Použitý kompilátor
+je g++ verze 4.7.</p>
+
+<hr>
+
+<b>Nápověda:</b><br>
+
+<ul>
+ <li>Nejprve implementujte sekvenční funkce pro vyhledávání na mapě. 
+  Správnost implementace lze ověřit lokálně pomocí 
+  infrastruktury v přiloženém archivu. Až budete mít funkce lokálně otestované, 
+  můžete je zkusit odevzdat na Progtest (pro tento pokus nechte <tt>MapAnalyzer</tt> 
+  s prázdným tělem). Takové řešení samozřejmě nedostane žádné body, ale uvidíte, 
+  zda správně projde sekvenčními testy.</li>
+
+ <li>Abyste zapojili co nejvíce jader, zpracovávejte několik problémů najednou. 
+   Vyzvedněte je pomocí opakovaného volání <tt>costFunc/crimeFunc</tt> a okamžitě po
+   analýze vracejte odpověď pomoci <tt>m_Done</tt>. Není potřeba dodržovat
+   pořadí při odevzdávání. Pokud budete najednou zpracovávat pouze jeden problém, 
+   nejspíše zaměstnáte pouze jedno vlákno a ostatní vlákna budou čekat 
+   bez užitku.</li>
+
+ <li>Funkce <tt>MapAnalyzer</tt> je volaná opakovaně, pro různé vstupy.
+   Nespoléhejte se na inicializaci globálních proměnných - při druhém a dalším 
+   zavolání budou mít globální proměnné hodnotu jinou. Je rozumné případné globální 
+   proměnné vždy inicializovat na začátku funkce <tt>MapAnalyzer</tt>. Ještě
+   lepší je nepoužívat globální proměnné vůbec.</li>
+
+ <li>Nepoužívejte mutexy a podmíněné proměnné inicializované pomocí
+   <tt>PTHREAD_MUTEX_INITIALIZER</tt>, důvod je stejný jako v minulém odstavci. 
+   Použijte raději <tt>pthread_mutex_init()</tt>.</li>
+
+ <li>Testovací prostředí samo o sobě nevytváří žádná vlákna, tedy funkce
+   <tt>MapAnalyzer</tt> sama o sobě nemusí být reentrantní (může používat 
+   globální proměnné, s omezením výše).</li>
+
+ <li>Mapy a struktury popisující zadávané problémy alokovalo testovací prostředí. 
+     Testovací prostředí se také postará o jejich uvolnění (po převzetí funkcí
+     <tt>m_Done</tt>). Jejich uvolnění tedy není Vaší starostí. Váš program je ale 
+     zodpovědný za uvolnění všech ostatních prostředků, které si alokoval.</li>
+
+ <li>Problémy musíte načítat, zpracovávat a odevzdávat průběžně. Postup, kdy
+   si všechny problémy načtete do paměťových struktur a teprve pak je začnete 
+   zpracovávat, nebude fungovat. Takové řešení skončí deadlockem v prvním testu 
+   s více vlákny. Musíte zároveň obsluhovat požadavky typu Cost i Crime. Řešení, 
+   které se bude snažit nejprve vyřešit všechny problémy typu Cost a pak začne 
+   obsluhovat problémy Crime, skončí taktéž deadlockem.</li>
+
+ <li>Volání <tt>m_Done</tt> je reentrantní, není potřeba je serializovat
+   (obalovat mutexy). Každý vyřešený problém odevzdávejte právě 1x. Rozumné 
+   je volat funkci <tt>m_Done</tt> přímo z výpočetního vlákna, které pro daný problém
+   dokončilo analýzu.</li>
+
+ <li>Neukončujte funkci <tt>MapAnalyzer</tt> pomocí <tt>exit</tt>,
+   <tt>pthread_exit</tt> a podobných funkcí. Pokud se funkce <tt>MapAnalyzer</tt> 
+   nevrátí do volajícího, bude Vaše implementace vyhodnocena jako nesprávná.</li>
+
+ <li>Využijte přiložená vzorová data. V archivu jednak naleznete ukázku
+   volání rozhraní (práce s ukazateli na funkce) a dále několik testovacích
+   vstupů a odpovídajících výsledků.</li>
+
+ <li>Nebojte se ukazatelů na funkce. Předaný parametr, např. <tt>costFunc</tt> použijte 
+   při volání jako každou jinou funkci:
+   <pre>    void MapAnalyzer ( ..., const TCostProblem * (*costFunc) ( void ), ... )
+     {
+       ...
+       const TCostProblem * x = costFunc ( );
+       ...
+     } 
+   </pre>
+
+   Pokud chcete volat funkci zprostředkovanou ukazatelem <tt>costFunc</tt> z jiné 
+   funkce než z <tt>MapAnalyzer</tt>, musíte si ukazatel předat:
+
+   <pre>    void foo ( void )
+     {
+       // nefunguje, funkce s takovym jmenem (asi) v testovacim prostredi
+       // neexistuje 
+       x = costFunc ( ); 
+     }
+    void bar ( const TCostProblem * (* costProblemFunc) ( void ) )
+     {
+       x = costProblemFunc (); // ok
+     }
+    void MapAnalyzer ( ..., const TCostProblem * (*costFunc) ( void ), ... )
+     {
+       ...
+       foo ();
+       bar ( costFunc );
+       ...
+     } 
+   </pre></li>
+ <li>V testovacím prostředí je k dispozici STL. Myslete ale na to, že ten samý STL 
+     kontejner nelze najednou zpřístupnit z více vláken. Více si o omezeních přečtěte např. 
+     na <a href="http://en.cppreference.com/w/cpp/container">C++ reference - thread safety.</a></li>
+
+ <li>Testovací prostředí je omezené velikostí paměti. Není uplatňován žádný explicitní limit, ale VM, 
+   ve které testy běží, je omezena 1 GiB celkové dostupné RAM. Úloha může být dost paměťově náročná, 
+   zejména pokud se rozhodnete pro jemné členění úlohy na jednotlivá vlákna. Pokud se rozhodnete pro 
+   takové jemné rozčlenění úlohy, možná budete muset přidat synchronizaci běhu vláken tak, aby celková 
+   potřebná paměť v žádný nepřesáhla nějaký rozumný limit. Pro běh máte garantováno, že Váš program 
+   má k dispozici nejméně 200 MiB pro Vaše data (data segment + stack + heap). Pro zvídavé - zbytek do 
+   1GiB je zabraný běžícím OS, dalšími procesy, zásobníky Vašich vláken a nějakou rezervou.</li>
+</ul>
+
+<hr>
+
+<b>Co znamenají jednotlivé testy:</b><br>
+<dl>
+ <dt><b>Test algoritmu (sekvencni)</b></dt><dd>Testovací prostředí opakovaně
+   volá funkci <tt>FindByCost/FindByCrime</tt> pro různé vstupy a kontroluje 
+   vypočtené výsledky. Slouží pro otestování implementace Vašeho algoritmu. 
+   Funkce <tt>MapAnalyzer</tt> není v tomto testu vůbec volaná. Zároveň si na 
+   tomto testu můžete ověřit, zda Vaše implementace algoritmu je dostatečně rychlá.</dd>
+
+ <dt><b>Základní test/test několika/test mnoha thready</b></dt><dd>Testovací
+   prostředí volá funkci <tt>MapAnalyzer</tt> pro různý počet vláken.
+
+ </dd><dt><b>Test zahlcení</b></dt><dd>Testovací prostředí generuje velké množství 
+   požadavků a kontroluje, zda si s tím Vaše implementace poradí. Pokud nebudete 
+   rozumně řídit počet rozpracovaných požadavků, překročíte paměťový limit.
+
+ </dd><dt><b>Test zrychleni vypoctu</b></dt><dd>Testovací prostředí spouští Vaši
+   funkci pro ta samá vstupní data s různým počtem vláken. Měří se čas běhu  
+   (wall i CPU). S rostoucím počtem vláken by měl wall time klesat, CPU time 
+   mírně růst (vlákna mají možnost běžet na dalších CPU). Pokud wall time    
+   neklesne, nebo klesne málo (např. pro 2 vlákna by měl ideálně klesnout na 
+   0.5, existuje určitá rezerva), test není splněn.</dd>
+
+ <dt><b>Busy waiting - pomale pozadavky</b></dt><dd>Do volání
+   <tt>costFunc/crimeFunc</tt> testovací prostředí vkládá uspávání vlákna 
+   (např. na 100 ms). Výpočetní vlákna tím nemají práci. Pokud výpočetní vlákna 
+   nejsou synchronizovaná blokujícím způsobem, výrazně vzroste CPU time a test
+   selže.</dd>      
+
+ <dt><b>Busy waiting - pomale notifikace</b></dt><dd>Do volání <tt>m_Done</tt>
+   je vložena pauza. Pokud jsou špatně blokována vlákna načítající vstup, výrazně 
+   vzroste CPU time. (Tento scénář je zde méně pravděpodobný.) Dále tímto testem
+   neprojdete, pokud zbytečně serializujete volání <tt>m_Done</tt>.</dd>
+
+ <dt><b>Busy waiting - complex</b></dt><dt></dt><dd>Je kombinací dvou posledně
+   jmenovaných testů.</dd>
+
+<dt><b>Test rozlozeni zateze</b></dt><dd>Testovací prostředí zkouší výpočet pouze 
+   pro jeden druh problémů (cost/crime). Výpočet by měl být rozdělen mezi všechna 
+   dostupná vlákna, vlákna by neměla být určena pro řešení problému pouze jednoho typu.
+   Pokud není výpočet dostatečně zrychlen, test selže. Test není povinný, ale 
+   jeho nezvládnutí znamená citelný bodový postih.</dd> 
+
+<dt><b>Test rozlozeni zateze (jemny)</b></dt><dd>Testovací prostředí zkouší, zda 
+   se do řešení jednoho problému dokáže zapojit více dostupných vláken. Pokud chcete 
+   v tomto testu uspět, musíte Váš program navrhnout tak, aby bylo možné využít 
+   více vláken i při analýze jednoho vstupního problému. Jedná se o test bonusový.</dd>
+   
+</dl>
+
+<hr>
+
+<b>Jak to vyřešit - pozor, SPOILER</b>
+<p>Pokud se nechcete obrat o dobrý pocit, že jste úlohu vyřešili zcela sami, 
+nečtěte dále.</p>
+<ul>
+ <li>Problém hledání oblasti s celkovou cenou nepřevyšující zadanou mez lze řešit 
+  v čase <tt>O(n^4)</tt>, kde <tt>n</tt> je šířka/výška mapy. Vzhledem k možným záporným 
+  hodnotám na vstupu nelze složitost snížit.</li>
+ <li>Problém hledání oblasti s max. kriminalitou nepřevyšující danou mez lze řešit 
+  se složitostí <tt>O(n^3)</tt>, kde <tt>n</tt> je šířka/výška mapy. Této
+  složitosti lze dosáhnout s minimem triků. Pokud je využito dynamické
+  programování, lze dosáhnout i složitosti <tt>O(n^2)</tt>. Testovací
+  prostředí primárně počítá s kubickým algoritmem řešení. Pokud detekuje
+  kvadratické řešení, upraví patřičně rozsah vstupních dat. Časy v ukázce
+  odpovídají kubickému algoritmu.</li>
+ <li>Rozdílná časová složitost problémů byla zvolena úmyslně, abyste byli nuceni dynamicky
+  rozdělovat požadavky na výpočetní vlákna.</li>
+ <li>Vzhledem k heterogennímu charakteru vstupních dat se hodí objektový návrh 
+  s polymorfismem.</li>
+</ul>
+
+<b>Další nápověda - SUPERSPOILER</b><br>
+
+<p>Podle potřeby v průběhu řešení úlohy zveřejníme další nápovědy pro 
+tápající studenty.</p>
+
+</td>
+       </tr>
+
+
+       <tr>
+        <td class="ltbCell" colspan="2" align="left"><b>Vzorová data:</b></td>
+        <td class="rtbCell" align="center"><div class="but1 w120"><div class="but2"><a class="butLink" href="https://progtest.fit.cvut.cz/index.php?X=TaskS&amp;Cou=136&amp;Tgr=834&amp;Tsk=1184">Download</a></div></div></td>
+       </tr>
+
+
+
+
+
+
+
+
+
+
+
+      </tbody></table>
+     </div>
+    </div>
+
+
+ <br>
+ <div class="topLayout">
+  <div class="outBox">
+   <table id="reftable" width="100%" cellspacing="0" cellpadding="2" border="0">
+   <tbody><tr>
+    <td class="ltbSepCell" align="left"><input name="SHOW_REF" onchange="showRefSolution()" type="checkbox">&nbsp;<b>Referenční řešení</b></td>
+    <td class="rtbSepCell" align="right">&nbsp;</td>
+   </tr>
+   <tr style="display: none;">
+    <td class="lrtbCell" colspan="2" align="left"><ul><li><b>Hodnotitel: automat</b><ul><li>Program zkompilován</li><li>Test 'Test algoritmu (sekvencni)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.004 s (limit: 30.000 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Zakladni test (1 thread)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.800 s (limit: 29.996 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test nekolika thready': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.345 s (limit: 29.196 s)</li><li>CPU time: 1.198 s (limit: 29.142 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test mnoha thready': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.308 s (limit: 28.851 s)</li><li>CPU time: 2.577 s (limit: 27.944 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test zahlceni': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 1.677 s (limit: 28.543 s)</li><li>CPU time: 2.289 s (limit: 25.367 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test zrychleni vypoctu': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 2.125 s (limit: 26.866 s)</li><li>CPU time: 5.195 s (limit: 23.078 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Busy waiting test (pomale pozadavky)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 1.513 s (limit: 10.000 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Busy waiting test (pomale notifikace)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 1.214 s (limit: 8.487 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Busy waiting test (complex)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 1.713 s (limit: 7.273 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test rozlozeni zateze': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 75.00 %</li><li>Celková doba běhu: 0.218 s (limit: 5.560 s)</li><li>CPU time: 0.767 s (limit: 9.768 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test rozlozeni zateze (jemny)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.563 s (limit: 10.000 s)</li><li>CPU time: 2.203 s (limit: 10.000 s)</li><li>Úspěch v bonusovém testu, hodnocení: 120.00 %</li></ul></li>
+<li>Celkové hodnocení: 120.00 % (= 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.20)</li></ul></li><li>Celkové procentní hodnocení: 120.00 %</li><li>Bonus za včasné odevzdání: 3.00</li><li>Celkem bodů: 1.20 * ( 30.00 + 3.00 ) = 39.60</li></ul></td>
+   </tr>
+    <tr style="display: none;">
+  <td class="ltbCell" align="left"><b>SW metriky:</b></td>
+  <td class="rtbCell" colspan="2" align="left">
+   <table cellpadding="2" border="0">
+    <tbody><tr>
+     <td>&nbsp;</td>
+     <td class="ac">Celkem</td>
+     <td class="ac">Průměr</td>
+     <td class="ac">Maximum</td>
+     <td>Jméno funkce</td>
+    </tr>
+    <tr>
+     <td>Funkce:</td>
+     <td class="ar"><b>33</b></td>
+     <td class="ar">--</td>
+     <td class="ar">--</td>
+     <td>--</td>
+    </tr>
+    <tr>
+     <td>Řádek kódu:</td>
+     <td class="ar"><b>400</b></td>
+     <td class="ar"><span class="textOk">12.12 ± 12.37</span></td>
+     <td class="ar"><span class="textWarn">52</span></td>
+     <td><tt>Sum(CJobQueue *,int,int)</tt></td>
+    </tr>
+    <tr>
+     <td>Cyklomatická složitost:</td>
+     <td class="ar"><b>70</b></td>
+     <td class="ar"><span class="textOk">2.12 ± 3.37</span></td>
+     <td class="ar"><span class="textOk">16</span></td>
+     <td><tt>Sum(CJobQueue *,int,int)</tt></td>
+    </tr>
+   </tbody></table>
+  </td>
+ </tr>
+   </tbody></table>
+  </div>
+ </div>
+
+
+
+
+ <br>
+ <div class="topLayout">
+  <div class="outBox">
+   <table id="maintable" width="100%" cellspacing="0" cellpadding="2" border="0">
+    <colgroup><col width="200">
+    <col>
+    <col width="130">
+
+   </colgroup><tbody><tr>
+    <td class="ltbOkSepCell" align="left"><b>1</b></td>
+    
+    
+   </tr>
+   <tr>
+    <td class="ltCell" align="left"><b>Stav odevzdání:</b></td>
+    <td class="tCell" align="left">Ohodnoceno</td>
+
+
+
+    <td class="rtbCell" rowspan="2">&nbsp;</td>
+
+
+   </tr>
+
+   <tr>
+    <td class="lbCell" align="left"><b>Hodnocení:</b></td>
+    <td class="bCell" align="left">39.6000</td>
+   </tr>   <tr>
+    <td class="lrtbCell" colspan="3" align="left"><ul><li><b>Hodnotitel: automat</b><ul><li>Program zkompilován</li><li>Test 'Test algoritmu (sekvencni)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.005 s (limit: 30.000 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Zakladni test (1 thread)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 3.735 s (limit: 29.995 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test nekolika thready': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.224 s (limit: 26.260 s)</li><li>CPU time: 0.853 s (limit: 26.161 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test mnoha thready': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 0.139 s (limit: 26.036 s)</li><li>CPU time: 1.118 s (limit: 25.308 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test zahlceni': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 80.00 %</li><li>Celková doba běhu: 5.450 s (limit: 25.897 s)</li><li>CPU time: 7.042 s (limit: 24.190 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test zrychleni vypoctu': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 8.900 s (limit: 20.447 s)</li><li>CPU time: 11.300 s (limit: 17.148 s)</li><li>Úspěch v závazném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Busy waiting test (pomale pozadavky)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 1.513 s (limit: 10.000 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Busy waiting test (pomale notifikace)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 1.211 s (limit: 8.487 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Busy waiting test (complex)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 50.00 %</li><li>Celková doba běhu: 1.715 s (limit: 7.276 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test rozlozeni zateze': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 75.00 %</li><li>Celková doba běhu: 0.340 s (limit: 5.561 s)</li><li>CPU time: 1.326 s (limit: 9.873 s)</li><li>Úspěch v nepovinném testu, hodnocení: 100.00 %</li></ul></li>
+<li>Test 'Test rozlozeni zateze (jemny)': Úspěch<ul><li>Dosaženo: 100.00 %, požadováno: 100.00 %</li><li>Celková doba běhu: 0.744 s (limit: 10.000 s)</li><li>CPU time: 2.020 s (limit: 10.000 s)</li><li>Úspěch v bonusovém testu, hodnocení: 120.00 %</li></ul></li>
+<li>Celkové hodnocení: 120.00 % (= 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.00 * 1.20)</li></ul></li><li>Celkové procentní hodnocení: 120.00 %</li><li>Bonus za včasné odevzdání: 3.00</li><li>Celkem bodů: 1.20 * ( 30.00 + 3.00 ) = 39.60</li></ul></td>
+   </tr> <tr>
+  <td class="ltbCell" align="left"><b>SW metriky:</b></td>
+  <td class="rtbCell" colspan="2" align="left">
+   <table cellpadding="2" border="0">
+    <tbody><tr>
+     <td>&nbsp;</td>
+     <td class="ac">Celkem</td>
+     <td class="ac">Průměr</td>
+     <td class="ac">Maximum</td>
+     <td>Jméno funkce</td>
+    </tr>
+    <tr>
+     <td>Funkce:</td>
+     <td class="ar"><b>36</b></td>
+     <td class="ar">--</td>
+     <td class="ar">--</td>
+     <td>--</td>
+    </tr>
+    <tr>
+     <td>Řádek kódu:</td>
+     <td class="ar"><b>520</b></td>
+     <td class="ar"><span class="textOk">14.44 ± 18.48</span></td>
+     <td class="ar"><span class="textWarn">64</span></td>
+     <td><tt>FindByCrime(double **,int,double,TRect *)</tt></td>
+    </tr>
+    <tr>
+     <td>Cyklomatická složitost:</td>
+     <td class="ar"><b>97</b></td>
+     <td class="ar"><span class="textOk">2.69 ± 4.20</span></td>
+     <td class="ar"><span class="textOk">16</span></td>
+     <td><tt>FindByCrime(double **,int,double,TRect *)</tt></td>
+    </tr>
+   </tbody></table>
+  </td>
+ </tr>   </tbody></table>
+  </div>
+ </div> <br>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+  </center>
+ </form>
+
+
+
+
+
+
+
+
+<script language="javascript" type="text/javascript">
+<!--
+
+var deadLine = new Date ( 1428271199 * 1000 );
+
+function CBpressed ( num )
+ {
+   var pre, cb;
+
+   cb = MM_findObj ( "cb_" + num );
+   pre = MM_findObj ( "pre_" + num );
+   if ( cb != null && pre != null )
+    {
+      pre . style . display = cb . checked ? "block" : "none";
+    }
+ }
+
+function unlockAdvice ( url )
+ {
+   if ( confirm ( 'Máte k dispozici pouze omezený počet nápověd. Navíc, použití nápovědy může snížit bodové hodnocení. Opravdu chcete zpřístupnit tuto nápovědu?' ) )
+    this . location = url;
+ }
+
+function setCountdown ( )
+ {
+   var d = new Date ();
+   var x = ( deadLine . getTime () - d . getTime () );
+   var tgt = document . getElementById ( "countdown" );
+
+   if ( x > 0 )
+    {
+      var s = Math . floor ( x / 1000 );
+      var ms = (x % 1000) + "";
+
+      while ( ms . length  < 3 ) ms = "0" + ms;
+
+      tgt . innerHTML = s + "." + ms + " sec";
+
+      window . setTimeout ( setCountdown, 117 );
+    }
+   else
+    {
+      tgt . innerHTML = '&nbsp;';
+    }
+ }
+
+function showRefSolution ( )
+ {
+   var t = document . getElementById ( "reftable" );
+   var x = document . getElementsByName ( "SHOW_REF" )[0];
+
+   if ( ! x ) return;
+   var r1 = t . rows[1], r2 = t . rows[2];
+
+   if ( x . checked )
+    {
+      r1 . style . display = "";
+      if ( r2 ) r2 . style . display = "";
+    }
+   else
+    {
+      r1 . style . display = "none";
+      if ( r2 ) r2 . style . display = "none";
+    }
+ }
+
+
+setCountdown ();
+showRefSolution ();
+
+// -->
+</script>
+
+
+
+
+
+ 
+
+
+</body></html>
+<!-- Template run time: 0.27827596664429 sec -->
